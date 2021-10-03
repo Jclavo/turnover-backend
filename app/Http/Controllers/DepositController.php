@@ -9,6 +9,8 @@ use App\Models\UserType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class DepositController extends ResponseController
 {
@@ -47,18 +49,30 @@ class DepositController extends ResponseController
         $validator = Validator::make($request->all(), [
             'amount' => ['required','gte:0','regex:/^[0-9]{1,6}+(?:\.[0-9]{1,2})?$/'],
             'description' => ['required','max:200'], 
-            'image' => ['required']
+            // 'image' => ['required','image','max:1024']
+            'image' => ['required','image']
         ]);
         
         if ($validator->fails()) {
             return $this->sendError($validator->errors()->first());
         }
 
+        //logic to work with image
+        $imageFile = $request->file('image');
+        
+        $path = Auth::user()->id;
+        $imageNewName = Carbon::now()->timestamp . '.' . $imageFile->getClientOriginalExtension();
+        
+        $filename = Storage::disk('images')->putFileAs($path, $imageFile, $imageNewName);
+        //$imageFullPath = Storage::disk('images')->path('') . $filename ;
+
+        //save
+        
         $deposit = new Deposit();
         
         $deposit->amount = $request->amount;
         $deposit->description = $request->description;
-        $deposit->image = $request->image;
+        $deposit->image = $filename;
         $deposit->status_id = DepositStatus::getForPending();
         $deposit->user_id = Auth::user()->id;
         $deposit->save();
