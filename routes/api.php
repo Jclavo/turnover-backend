@@ -17,11 +17,16 @@ use Illuminate\Support\Facades\Route;
 Route::post('login', 'UserController@login');
 Route::post('users', 'UserController@store');
 
-Route::middleware(['auth:sanctum'])->group(function () {
     //here your api under authentication
-    // Route::resource('deposit-statuses', 'DepositStatusController');
-    Route::get('deposit-statuses', 'DepositStatusController@index');    
+Route::middleware(['auth:sanctum'])->group(function () {
 
+    // Route::resource('deposit-statuses', 'DepositStatusController');
+
+    //deposit-statuses
+    Route::get('deposit-statuses', 'DepositStatusController@index'); 
+    
+    //deposits
+    Route::post('deposits', 'DepositController@store'); 
 });
 
 
