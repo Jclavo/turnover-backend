@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
+use App\Models\UserType;
+
 class UserController extends ResponseController
 {
     /**
@@ -42,10 +44,15 @@ class UserController extends ResponseController
             'username' => ['required','max:45'],
             'email' => ['required','email','max:45','unique:users'], 
             'password' => ['required','min:8'], 
+            'type_id' => 'required|exists:user_types,code',
         ]);
         
         if ($validator->fails()) {
             return $this->sendError($validator->errors()->first());
+        }
+
+        if ($request->type_id != UserType::getForCustomer()){
+            return $this->sendError("Only User type 'Customer' can be created.");
         }
 
         $user = new User();
@@ -53,7 +60,7 @@ class UserController extends ResponseController
         $user->username = $request->username;
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
-
+        $user->type_id = $request->type_id;
         $user->save();
 
         return $this->sendResponse($user->toArray(), 'Customer created');  

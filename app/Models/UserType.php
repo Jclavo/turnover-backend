@@ -17,4 +17,14 @@ class UserType extends Model
     protected $fillable = [
         'code', 'name'
     ];
+
+    //Getter (statics)
+
+    static function getForAdmin(){
+        return 1;
+    }
+
+    static function getForCustomer(){
+        return 2;
+    }
 }

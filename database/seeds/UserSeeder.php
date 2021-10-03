@@ -3,7 +3,8 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+
+use App\Models\UserType;
 
 class UserSeeder extends Seeder
 {
@@ -18,6 +19,7 @@ class UserSeeder extends Seeder
             'username' => 'Admin',
             'email' => 'admin@test.com',
             'password' => Hash::make('password'),
+            'type_id' => UserType::getForAdmin(),
         ]);
     }
 }
