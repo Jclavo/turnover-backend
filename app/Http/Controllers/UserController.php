@@ -39,7 +39,7 @@ class UserController extends ResponseController
     {
         //
         $validator = Validator::make($request->all(), [
-            'name' => ['required','max:45'],
+            'username' => ['required','max:45'],
             'email' => ['required','email','max:45','unique:users'], 
             'password' => ['required','min:8'], 
         ]);
@@ -50,7 +50,7 @@ class UserController extends ResponseController
 
         $user = new User();
         
-        $user->name = $request->name;
+        $user->username = $request->username;
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
 
@@ -125,7 +125,7 @@ class UserController extends ResponseController
             return $this->sendError("email/password wrong.");  
         }
 
-        Auth::user()->token = Auth::user()->createToken(Auth::user()->name)->plainTextToken;
+        Auth::user()->token = Auth::user()->createToken(Auth::user()->username)->plainTextToken;
 
         return $this->sendResponse(Auth::user()->toArray(), "Login ok");          
     }
