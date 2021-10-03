@@ -19,7 +19,8 @@ Route::post('users', 'UserController@store');
 
 Route::middleware(['auth:sanctum'])->group(function () {
     //here your api under authentication
-    //Route::resource('customers', 'CustomerController');
+    // Route::resource('deposit-statuses', 'DepositStatusController');
+    Route::get('deposit-statuses', 'DepositStatusController@index');    
 
 });
 
