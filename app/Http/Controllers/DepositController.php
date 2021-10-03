@@ -168,4 +168,38 @@ class DepositController extends ResponseController
         return $this->sendResponse($deposit->toArray(), 'Deposit status updated.');  
 
     }
+
+    /**
+     * Pagination (it is not implemented yet the pagination feature, now it is getting all records)
+     */
+
+    public function pagination(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'date' => ['required','date','before_or_equal:today'],
+        ]);
+
+        $validator->sometimes('status_id', ['required','exists:deposit_statuses,code'], function ($request) {
+            return Auth::user()->type_id == UserType::getForCustomer();
+        });
+
+        if ($validator->fails()) {
+            return $this->sendError($validator->errors()->first());
+        }
+
+        $query = Deposit::query();
+        $query->whereBetween('created_at',[$request->date.' 00:00:00', $request->date.' 23:59:59']);
+
+
+        if (Auth::user()->type_id == UserType::getForAdmin()) {
+            $query->where('status_id', '=', DepositStatus::getForPending());
+        }else{
+            $query->where('user_id', '=', Auth::user()->id);
+            $query->where('status_id', '=', $request->status_id);
+        }
+
+        $deposits = $query->get();
+
+        return $this->sendResponse($deposits->toArray(), 'Deposits gotten.');  
+    }
 }
