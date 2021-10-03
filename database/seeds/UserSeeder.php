@@ -21,5 +21,12 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'type_id' => UserType::getForAdmin(),
         ]);
+
+        DB::table('users')->insert([
+            'username' => 'coco',
+            'email' => 'coco@test.com',
+            'password' => Hash::make('password'),
+            'type_id' => UserType::getForCustomer(),
+        ]);
     }
 }

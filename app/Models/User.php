@@ -37,4 +37,23 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    //functions
+    function updateBalance($amount,$action){
+        
+        switch ($action) {
+            case '+':
+                $this->balance += $amount;
+                $this->save();
+                break;
+            case '-':
+                $this->balance -= $amount;
+                $this->save();
+                break;
+            default:
+                # code...
+                break;
+        }
+        
+    }
 }

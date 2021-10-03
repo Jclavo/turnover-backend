@@ -20,7 +20,7 @@ class CreateDepositsTable extends Migration
             $table->string('image');
             //FK
             $table->unsignedBigInteger('status_id');
-            $table->foreign('status_id')->references('code')->on('user_types');
+            $table->foreign('status_id')->references('code')->on('deposit_statuses');
             //FK
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
