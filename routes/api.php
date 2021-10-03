@@ -31,7 +31,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('deposits/pagination', 'DepositController@pagination'); 
 
     //purchases
-    Route::post('purchases', 'PurchaseController@store'); 
+    Route::post('purchases', 'PurchaseController@store');
+    Route::post('purchases/pagination', 'PurchaseController@pagination');
 });
 
 

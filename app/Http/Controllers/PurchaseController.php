@@ -113,4 +113,31 @@ class PurchaseController extends ResponseController
     {
         //
     }
+
+    /**
+     * Pagination (it is not implemented yet the pagination feature, now it is getting all records)
+    */
+
+    public function pagination(Request $request)
+    {
+        if (Auth::user()->type_id != UserType::getForCustomer()){
+            return $this->sendError("Only User type 'Customer' can make a purchase.");
+        }
+
+        $validator = Validator::make($request->all(), [
+            'date' => ['required','date','before_or_equal:today'],
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError($validator->errors()->first());
+        }
+
+        $query = Purchase::query();
+        $query->whereBetween('created_at',[$request->date.' 00:00:00', $request->date.' 23:59:59']);
+        $query->where('user_id', '=', Auth::user()->id);
+
+        $purchases = $query->get();
+
+        return $this->sendResponse($purchases->toArray(), 'Purchases gotten.');  
+    }
 }
