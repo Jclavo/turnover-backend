@@ -17,8 +17,8 @@
 							"mode": "formdata",
 							"formdata": [
 								{
-									"key": "name",
-									"value": "Jose",
+									"key": "username",
+									"value": "jose",
 									"type": "text"
 								},
 								{
@@ -29,6 +29,11 @@
 								{
 									"key": "password",
 									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "type_id",
+									"value": "2",
 									"type": "text"
 								}
 							]
@@ -48,7 +53,251 @@
 			]
 		},
 		{
-			"name": "login",
+			"name": "Deposit Statuses",
+			"item": [
+				{
+					"name": "get-all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{url}}/deposit-statuses",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"deposit-statuses"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Deposits",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "date",
+									"value": "2021-10-03",
+									"type": "text"
+								},
+								{
+									"key": "status_id",
+									"value": "2",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/deposits/pagination",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"deposits",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "amount",
+									"value": "500",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "abc",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/home/jclavo/Downloads/crnm_front.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/deposits",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"deposits"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_admin}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "status_id",
+									"value": "2",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/deposits/update-status",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"deposits",
+								"update-status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Purchases",
+			"item": [
+				{
+					"name": "pagination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "date",
+									"value": "2021-10-03",
+									"type": "text"
+								},
+								{
+									"key": "status_id",
+									"value": "3",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/purchases/pagination",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"purchases",
+								"pagination"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "amount",
+									"value": "0.60",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "abc",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/purchases",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"purchases"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "login admin",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -58,6 +307,38 @@
 						{
 							"key": "email",
 							"value": "admin@test.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "password",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "coco@test.com",
 							"type": "text"
 						},
 						{
