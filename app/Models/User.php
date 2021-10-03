@@ -45,15 +45,19 @@ class User extends Authenticatable
             case '+':
                 $this->balance += $amount;
                 $this->save();
-                break;
+                return true;
             case '-':
+                if ($amount > $this->balance) {
+                    return false; // not enough $$$
+                }
                 $this->balance -= $amount;
                 $this->save();
-                break;
+                return true;
             default:
                 # code...
                 break;
         }
+        return false; // unknow erro
         
     }
 }

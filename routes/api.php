@@ -29,6 +29,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('deposits', 'DepositController@store'); 
     Route::post('deposits/update-status', 'DepositController@updatedStatus'); 
     Route::post('deposits/pagination', 'DepositController@pagination'); 
+
+    //purchases
+    Route::post('purchases', 'PurchaseController@store'); 
 });
 
 
