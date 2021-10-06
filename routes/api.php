@@ -22,6 +22,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Route::resource('deposit-statuses', 'DepositStatusController');
 
+    //users
+    Route::get('users/get-balance', 'UserController@getBalance');
+
     //deposit-statuses
     Route::get('deposit-statuses', 'DepositStatusController@index'); 
     

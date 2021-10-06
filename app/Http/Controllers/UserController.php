@@ -136,4 +136,15 @@ class UserController extends ResponseController
 
         return $this->sendResponse(Auth::user()->toArray(), "Login ok");          
     }
+
+
+    /**
+     * Get Info
+     */
+    public function getBalance(){
+
+        $user = User::findOrFail(Auth::user()->id); 
+        
+        return $this->sendResponse($user->balance, "getInfo ok");        
+    }
 }
