@@ -215,6 +215,8 @@ class DepositController extends ResponseController
             $query->where('status_id', '=', $request->status_id);
         }
 
+        $query->orderBy('created_at','DESC');
+
         $deposits = $query->get();
 
         return $this->sendResponse($deposits->toArray(), 'Deposits gotten.');
