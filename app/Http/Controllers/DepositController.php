@@ -50,7 +50,7 @@ class DepositController extends ResponseController
         $validator = Validator::make($request->all(), [
             'amount' => ['required', 'gte:0', 'regex:/^[0-9]{1,6}+(?:\.[0-9]{1,2})?$/'],
             'description' => ['required', 'max:200'],
-            'image' => ['required','regex:/^data:image\/(?:png|jpeg|bmp|svg\+xml)(?:;charset=utf-8)?;base64,(?:[A-Za-z0-9]|[+\/])+={0,2}/']
+            'image' => ['required']
         ]);
 
         if ($validator->fails()) {
@@ -62,10 +62,13 @@ class DepositController extends ResponseController
         //get image
         $imageBase64 = $request->image;
 
-        //get image extension
+        //get image extension and validate it
         $image_parts = explode(";base64,", $imageBase64);
-        $image_extension_aux = explode("image/", $image_parts[0]);
-        $image_extension = $image_extension_aux[1];
+        $image_extension_aux = explode("image/", isset($image_parts[0]) ? $image_parts[0] : '' );
+        $image_extension = isset($image_extension_aux[1]) ? $image_extension_aux[1]: '';
+        if(!in_array($image_extension,["png","jpeg","bmp"])){
+            return $this->sendError("Something wrong, check your format and remember accepted extension are: png|jpeg|bmp");
+        }
 
         //fancy code
         $imageBase64 = substr($imageBase64, strpos($imageBase64, ",") + 1);
