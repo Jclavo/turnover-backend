@@ -176,7 +176,7 @@ class DepositController extends ResponseController
     public function pagination(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'date' => ['required','date','before_or_equal:today'],
+            'created_at' => ['required','date','before_or_equal:today'],
         ]);
 
         $validator->sometimes('status_id', ['required','exists:deposit_statuses,code'], function ($request) {
@@ -188,7 +188,7 @@ class DepositController extends ResponseController
         }
 
         $query = Deposit::query();
-        $query->whereBetween('created_at',[$request->date.' 00:00:00', $request->date.' 23:59:59']);
+        $query->whereBetween('created_at',[$request->created_at.' 00:00:00', $request->created_at.' 23:59:59']);
 
 
         if (Auth::user()->type_id == UserType::getForAdmin()) {

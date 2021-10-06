@@ -125,7 +125,7 @@ class PurchaseController extends ResponseController
         }
 
         $validator = Validator::make($request->all(), [
-            'date' => ['required','date','before_or_equal:today'],
+            'created_at' => ['required','date','before_or_equal:today'],
         ]);
 
         if ($validator->fails()) {
@@ -133,7 +133,7 @@ class PurchaseController extends ResponseController
         }
 
         $query = Purchase::query();
-        $query->whereBetween('created_at',[$request->date.' 00:00:00', $request->date.' 23:59:59']);
+        $query->whereBetween('created_at',[$request->created_at.' 00:00:00', $request->created_at.' 23:59:59']);
         $query->where('user_id', '=', Auth::user()->id);
 
         $purchases = $query->get();
