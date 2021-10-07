@@ -193,8 +193,12 @@ class DepositController extends ResponseController
     public function pagination(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'created_at' => ['required', 'date', 'before_or_equal:today'],
+            // 'created_at' => ['required', 'date', 'before_or_equal:today'],
         ]);
+
+        $validator->sometimes('created_at', ['required', 'date', 'before_or_equal:today'], function ($request) {
+            return Auth::user()->type_id == UserType::getForCustomer();
+        });
 
         $validator->sometimes('status_id', ['required', 'exists:deposit_statuses,code'], function ($request) {
             return Auth::user()->type_id == UserType::getForCustomer();
@@ -204,13 +208,13 @@ class DepositController extends ResponseController
             return $this->sendError($validator->errors()->first());
         }
 
-        $query = Deposit::query();
-        $query->whereBetween('created_at', [$request->created_at . ' 00:00:00', $request->created_at . ' 23:59:59']);
+        $query = Deposit::query();  
 
 
         if (Auth::user()->type_id == UserType::getForAdmin()) {
             $query->where('status_id', '=', DepositStatus::getForPending());
         } else {
+            $query->whereBetween('created_at', [$request->created_at . ' 00:00:00', $request->created_at . ' 23:59:59']);
             $query->where('user_id', '=', Auth::user()->id);
             $query->where('status_id', '=', $request->status_id);
         }
