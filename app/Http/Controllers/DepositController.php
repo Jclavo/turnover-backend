@@ -43,42 +43,59 @@ class DepositController extends ResponseController
      */
     public function store(Request $request)
     {
-        if (Auth::user()->type_id != UserType::getForCustomer()){
+        if (Auth::user()->type_id != UserType::getForCustomer()) {
             return $this->sendError("Only User type 'Customer' can make a deposit.");
         }
 
         $validator = Validator::make($request->all(), [
-            'amount' => ['required','gte:0','regex:/^[0-9]{1,6}+(?:\.[0-9]{1,2})?$/'],
-            'description' => ['required','max:200'], 
-            // 'image' => ['required','image','max:1024']
-            'image' => ['required','image']
+            'amount' => ['required', 'gte:0', 'regex:/^[0-9]{1,6}+(?:\.[0-9]{1,2})?$/'],
+            'description' => ['required', 'max:200'],
+            'image' => ['required']
         ]);
-        
+
         if ($validator->fails()) {
             return $this->sendError($validator->errors()->first());
         }
 
-        //logic to work with image
-        $imageFile = $request->file('image');
-        
-        $path = Auth::user()->id;
-        $imageNewName = Carbon::now()->timestamp . '.' . $imageFile->getClientOriginalExtension();
-        
-        $filename = Storage::disk('images')->putFileAs($path, $imageFile, $imageNewName);
-        //$imageFullPath = Storage::disk('images')->path('') . $filename ;
+        // * logic to work with image
+ 
+        //get image
+        $imageBase64 = $request->image;
 
-        //save
-        
+        //get image extension and validate it
+        $image_parts = explode(";base64,", $imageBase64);
+        $image_extension_aux = explode("image/", isset($image_parts[0]) ? $image_parts[0] : '' );
+        $image_extension = isset($image_extension_aux[1]) ? $image_extension_aux[1]: '';
+        if(!in_array($image_extension,["png","jpeg","bmp"])){
+            return $this->sendError("Something wrong, check your format and remember accepted extension are: png|jpeg|bmp");
+        }
+
+        //fancy code
+        $imageBase64 = substr($imageBase64, strpos($imageBase64, ",") + 1);
+
+        //set image name
+        $imageNewName = Auth::user()->id . '/' . Carbon::now()->timestamp . '.' . $image_extension;
+
+        //create dir if not exist
+        if (!is_dir(Storage::disk('images')->path('') . Auth::user()->id)) {
+            mkdir(Storage::disk('images')->path('') . Auth::user()->id);
+        }
+
+        //save image
+        file_put_contents(Storage::disk('images')->path('') . $imageNewName, base64_decode($imageBase64));
+
+        //save deposit
+
         $deposit = new Deposit();
-        
+
         $deposit->amount = $request->amount;
         $deposit->description = $request->description;
-        $deposit->image = $filename;
+        $deposit->image = $imageNewName;
         $deposit->status_id = DepositStatus::getForPending();
         $deposit->user_id = Auth::user()->id;
         $deposit->save();
 
-        return $this->sendResponse($deposit->toArray(), 'Deposit created');  
+        return $this->sendResponse($deposit->toArray(), 'Deposit created');
     }
 
     /**
@@ -87,9 +104,16 @@ class DepositController extends ResponseController
      * @param  \App\Models\Deposit  $deposit
      * @return \Illuminate\Http\Response
      */
-    public function show(Deposit $deposit)
+    public function show($id)
     {
-        //
+        if (Auth::user()->type_id != UserType::getForAdmin()) {
+            return $this->sendError("Only User type 'Admin' can do this action.");
+        }
+
+        $deposit = Deposit::where('status_id', '=', DepositStatus::getForPending())->findOrFail($id);
+
+        return $this->sendResponse($deposit->toArray(), 'Deposit gotten.');
+
     }
 
     /**
@@ -130,26 +154,27 @@ class DepositController extends ResponseController
     /**
      * Updated Status 
      */
-    public function updatedStatus(Request $request){
+    public function updatedStatus(Request $request)
+    {
 
-        if (Auth::user()->type_id != UserType::getForAdmin()){
+        if (Auth::user()->type_id != UserType::getForAdmin()) {
             return $this->sendError("Only User type 'Admin' can do this action.");
         }
 
         $validator = Validator::make($request->all(), [
-            'id' => ['required','exists:deposits'],
-            'status_id' => ['required','exists:deposit_statuses,code'],
+            'id' => ['required', 'exists:deposits'],
+            'status_id' => ['required', 'exists:deposit_statuses,code'],
         ]);
-        
+
         if ($validator->fails()) {
             return $this->sendError($validator->errors()->first());
         }
 
-        if (!in_array($request->status_id, [DepositStatus::getForAccepted(),DepositStatus::getForRejected()])) {
+        if (!in_array($request->status_id, [DepositStatus::getForAccepted(), DepositStatus::getForRejected()])) {
             return $this->sendError("Status not accepted.");
         }
 
-        $deposit = Deposit::findOrFail($request->id); 
+        $deposit = Deposit::findOrFail($request->id);
 
         if ($deposit->status_id != DepositStatus::getForPending()) {
             return $this->sendError("The current status can not be updated.");
@@ -157,16 +182,15 @@ class DepositController extends ResponseController
 
         //update balance
         if ($request->status_id == DepositStatus::getForAccepted()) {
-            $user = User::findOrFail($deposit->user_id); 
-            $user->updateBalance($deposit->amount,'+');
+            $user = User::findOrFail($deposit->user_id);
+            $user->updateBalance($deposit->amount, '+');
         }
 
         //update deposit status
         $deposit->status_id = $request->status_id;
         $deposit->save();
 
-        return $this->sendResponse($deposit->toArray(), 'Deposit status updated.');  
-
+        return $this->sendResponse($deposit->toArray(), 'Deposit status updated.');
     }
 
     /**
@@ -176,10 +200,14 @@ class DepositController extends ResponseController
     public function pagination(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'date' => ['required','date','before_or_equal:today'],
+            // 'created_at' => ['required', 'date', 'before_or_equal:today'],
         ]);
 
-        $validator->sometimes('status_id', ['required','exists:deposit_statuses,code'], function ($request) {
+        $validator->sometimes('created_at', ['required', 'date', 'before_or_equal:today'], function ($request) {
+            return Auth::user()->type_id == UserType::getForCustomer();
+        });
+
+        $validator->sometimes('status_id', ['required', 'exists:deposit_statuses,code'], function ($request) {
             return Auth::user()->type_id == UserType::getForCustomer();
         });
 
@@ -187,19 +215,21 @@ class DepositController extends ResponseController
             return $this->sendError($validator->errors()->first());
         }
 
-        $query = Deposit::query();
-        $query->whereBetween('created_at',[$request->date.' 00:00:00', $request->date.' 23:59:59']);
+        $query = Deposit::query();  
 
 
         if (Auth::user()->type_id == UserType::getForAdmin()) {
             $query->where('status_id', '=', DepositStatus::getForPending());
-        }else{
+        } else {
+            $query->whereBetween('created_at', [$request->created_at . ' 00:00:00', $request->created_at . ' 23:59:59']);
             $query->where('user_id', '=', Auth::user()->id);
             $query->where('status_id', '=', $request->status_id);
         }
 
+        $query->orderBy('created_at','DESC');
+
         $deposits = $query->get();
 
-        return $this->sendResponse($deposits->toArray(), 'Deposits gotten.');  
+        return $this->sendResponse($deposits->toArray(), 'Deposits gotten.');
     }
 }

@@ -20,13 +20,14 @@ Route::post('users', 'UserController@store');
     //here your api under authentication
 Route::middleware(['auth:sanctum'])->group(function () {
 
-    // Route::resource('deposit-statuses', 'DepositStatusController');
+    //users
+    Route::get('users/get-balance', 'UserController@getBalance');
 
     //deposit-statuses
     Route::get('deposit-statuses', 'DepositStatusController@index'); 
     
     //deposits
-    Route::post('deposits', 'DepositController@store'); 
+    Route::resource('deposits', 'DepositController');
     Route::post('deposits/update-status', 'DepositController@updatedStatus'); 
     Route::post('deposits/pagination', 'DepositController@pagination'); 
 
