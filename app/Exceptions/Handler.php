@@ -57,6 +57,6 @@ class Handler extends ExceptionHandler
         // {
         //     return response()->json($response, 401);
         // }
-        return response()->json($response, 401);
+        return response()->json($response);
     }
 }
