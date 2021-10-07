@@ -104,9 +104,16 @@ class DepositController extends ResponseController
      * @param  \App\Models\Deposit  $deposit
      * @return \Illuminate\Http\Response
      */
-    public function show(Deposit $deposit)
+    public function show($id)
     {
-        //
+        if (Auth::user()->type_id != UserType::getForAdmin()) {
+            return $this->sendError("Only User type 'Admin' can do this action.");
+        }
+
+        $deposit = Deposit::where('status_id', '=', DepositStatus::getForPending())->findOrFail($id);
+
+        return $this->sendResponse($deposit->toArray(), 'Deposit gotten.');
+
     }
 
     /**
